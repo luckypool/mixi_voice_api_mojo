@@ -1,0 +1,10 @@
+% layout 'default';
+% title 'error';
+
+error: <%= $error_info %>
+
+<br/>
+<br/>
+return to <a href='/'>home</a>
+
+

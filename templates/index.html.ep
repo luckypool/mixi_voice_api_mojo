@@ -1,3 +1,8 @@
 % layout 'default';
 % title 'Welcome';
 Welcome to the Mojolicious real-time web framework!
+
+<ul>
+<li><a href='/auth'>login</a></li>
+</ul>
+

@@ -1,0 +1,4 @@
+% layout 'default';
+% title 'redirect';
+redirect to <%= $url %>
+
