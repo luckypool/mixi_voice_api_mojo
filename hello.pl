@@ -52,22 +52,22 @@ sub __refresh_access_token {
     my $token_json = Mojo::JSON->decode($res);
 
     return exists $token_json->{error} ? { error_info => $token_json->{error} }
-        : {
-            access_token => $token_json->{access_token},
-            refresh_token => $token_json->{refresh_token},
-            expires_in => $token_json->{expires_in}
-        };
+    : {
+        access_token => $token_json->{access_token},
+        refresh_token => $token_json->{refresh_token},
+        expires_in => $token_json->{expires_in}
+    };
 }
 
 sub __get_user_timeline {
-	my ($access_token, $user_id) = @_;
+    my ($access_token, $user_id) = @_;
     my $url_for_get_token = Mojo::URL->new("https://api.mixi-platform.com/2/voice/statuses/$user_id/user_timeline");
-	# Mojo::UserAgentを使ってGETリクエスト
+    # Mojo::UserAgentを使ってGETリクエスト
     my $ua = Mojo::UserAgent->new;
     my $res = $ua->get(
         $url_for_get_token => {
             'Authorization' => "OAuth $access_token"
-		}
+        }
     )->res->content->asset->slurp;
     return Mojo::JSON->decode($res);
 }
@@ -78,13 +78,13 @@ get '/' => sub {
         return $self->render('index');
     }
 
-	my $refreshed_token = __refresh_access_token($self->session->{refresh_token});
+    my $refreshed_token = __refresh_access_token($self->session->{refresh_token});
     if (exists $refreshed_token->{error_info}){
         $self->session(expires => 1);
         $self->flash(error_info => $refreshed_token->{error_info}+' (Maybe, session-timeout)');
         return $self->redirect_to('/error');
     }
-	$self->session(access_token => $refreshed_token->{access_token});
+    $self->session(access_token => $refreshed_token->{access_token});
     $self->session(refresh_token => $refreshed_token->{refresh_token});
     $self->session(expires => time + $refreshed_token->{expires_in});
 
@@ -97,7 +97,7 @@ get '/auth' => sub {
     $url->query([
             client_id => $CREDENTIAL_INFO->{CONSUMER_KEY},
             response_type => 'code',
-            scope => $SCOPE_INFO 
+            scope => $SCOPE_INFO
         ]);
     $self->redirect_to($url->to_abs);
 };
@@ -146,10 +146,11 @@ get '/redirect' => sub{
 };
 
 get '/voice' => sub {
-	my $self = shift;
-	my $res_json = __get_user_timeline($self->session->{access_token}, '@me');
-	$self->stash(user_timeline => $res_json );
-	$self->render('voice');
+    my $self = shift;
+    my $res_json = __get_user_timeline($self->session->{access_token}, '@me');
+    print Dumper($res_json);
+    $self->stash(user_timeline => $res_json );
+    $self->render('voice');
 };
 
 app->start;

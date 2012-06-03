@@ -1,11 +1,13 @@
 % layout 'default';
-% title 'voice';
+% title 'voice:ボイス';
 <h1>
 Welcome to mixi Graph API
 </h1>
-<br/>
-<br/>
-<%= $user_timeline %>
+<a href='/'>home</a>
 <ul>
-<li><a href='/logout'>logout</a></li>
-<ul>
+<% foreach my $voice (@$user_timeline) { %>
+  <li> <%= $voice->{text} %> </li>
+<% } %>
+</ul>
+
+ログアウト：<a href='/logout'>logout</a>
