@@ -3,13 +3,12 @@ use Mojolicious::Lite;
 use Data::Dumper;
 
 my $CREDENTIAL_INFO = {
-    CONSUMER_KEY => 'XXXXXXXXXX',
-    CONSUMER_SECRET => 'XXXXXXXXXXXX',
+    CONSUMER_KEY => 'XXXX',
+    CONSUMER_SECRET => 'XXXX',
     REDIRECT_URI => 'http://localhost:3000/redirect'
 };
 
 my $SCOPE_INFO = 'r_voice';
-
 
 sub __get_access_token {
     my ($code) = @_;
@@ -60,22 +59,32 @@ sub __refresh_access_token {
         };
 }
 
+sub __get_user_timeline {
+	my ($access_token, $user_id) = @_;
+    my $url_for_get_token = Mojo::URL->new("https://api.mixi-platform.com/2/voice/statuses/$user_id/user_timeline");
+	# Mojo::UserAgentを使ってGETリクエスト
+    my $ua = Mojo::UserAgent->new;
+    my $res = $ua->get(
+        $url_for_get_token => {
+            'Authorization' => "OAuth $access_token"
+		}
+    )->res->content->asset->slurp;
+    return Mojo::JSON->decode($res);
+}
+
 get '/' => sub {
     my $self = shift;
-
     unless (exists $self->session->{access_token}) {
         return $self->render('index');
     }
 
-    my $refreshed_token = __refresh_access_token($self->session->{refresh_token});
-    print Dumper($refreshed_token);
+	my $refreshed_token = __refresh_access_token($self->session->{refresh_token});
     if (exists $refreshed_token->{error_info}){
         $self->session(expires => 1);
         $self->flash(error_info => $refreshed_token->{error_info}+' (Maybe, session-timeout)');
         return $self->redirect_to('/error');
     }
-
-    $self->session(access_token => $refreshed_token->{access_token});
+	$self->session(access_token => $refreshed_token->{access_token});
     $self->session(refresh_token => $refreshed_token->{refresh_token});
     $self->session(expires => time + $refreshed_token->{expires_in});
 
@@ -88,7 +97,7 @@ get '/auth' => sub {
     $url->query([
             client_id => $CREDENTIAL_INFO->{CONSUMER_KEY},
             response_type => 'code',
-            scope => $SCOPE_INFO
+            scope => $SCOPE_INFO 
         ]);
     $self->redirect_to($url->to_abs);
 };
@@ -134,6 +143,13 @@ get '/redirect' => sub{
     # ルートページにリダイレクト
     $self->redirect_to('/');
 
+};
+
+get '/voice' => sub {
+	my $self = shift;
+	my $res_json = __get_user_timeline($self->session->{access_token}, '@me');
+	$self->stash(user_timeline => $res_json );
+	$self->render('voice');
 };
 
 app->start;

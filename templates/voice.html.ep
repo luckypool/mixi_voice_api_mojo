@@ -1,8 +1,11 @@
 % layout 'default';
-% title 'Welcome';
+% title 'voice';
+<h1>
 Welcome to mixi Graph API
-
+</h1>
+<br/>
+<br/>
+<%= $user_timeline %>
 <ul>
 <li><a href='/logout'>logout</a></li>
-<li><a href='/voice'>voice</a></li>
 <ul>
