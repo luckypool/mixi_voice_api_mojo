@@ -3,8 +3,8 @@ use Mojolicious::Lite;
 use Data::Dumper;
 
 my $CREDENTIAL_INFO = {
-    CONSUMER_KEY => '9dfc841107208de06b67',
-    CONSUMER_SECRET => '53433ab41c32533ca2b88532c6e9754289e22633',
+    CONSUMER_KEY => 'XXXXXXXXXX',
+    CONSUMER_SECRET => 'XXXXXXXXXXXX',
     REDIRECT_URI => 'http://localhost:3000/redirect'
 };
 
