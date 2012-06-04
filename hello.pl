@@ -8,7 +8,7 @@ my $CREDENTIAL_INFO = {
     REDIRECT_URI => 'http://localhost:3000/redirect'
 };
 
-my $SCOPE_INFO = 'r_voice';
+my $SCOPE_INFO = 'r_voice w_voice';
 
 sub __get_access_token {
     my ($code) = @_;
@@ -59,16 +59,45 @@ sub __refresh_access_token {
     };
 }
 
-sub __get_user_timeline {
-    my ($access_token, $user_id) = @_;
-    my $url_for_get_token = Mojo::URL->new("https://api.mixi-platform.com/2/voice/statuses/$user_id/user_timeline");
-    # Mojo::UserAgentを使ってGETリクエスト
+sub __get_friends_timeline {
+    my ($access_token) = @_;
+    my $url_for_get_timeline = Mojo::URL->new("https://api.mixi-platform.com/2/voice/statuses/friends_timeline");
     my $ua = Mojo::UserAgent->new;
     my $res = $ua->get(
-        $url_for_get_token => {
+        $url_for_get_timeline => {
             'Authorization' => "OAuth $access_token"
         }
     )->res->content->asset->slurp;
+    return Mojo::JSON->decode($res);
+}
+
+sub __get_user_timeline {
+    my ($access_token, $user_id) = @_;
+    my $url_for_get_timeline = Mojo::URL->new("https://api.mixi-platform.com/2/voice/statuses/$user_id/user_timeline");
+    # Mojo::UserAgentを使ってGETリクエスト
+    my $ua = Mojo::UserAgent->new;
+    my $res = $ua->get(
+        $url_for_get_timeline => {
+            'Authorization' => "OAuth $access_token"
+        }
+    )->res->content->asset->slurp;
+    return Mojo::JSON->decode($res);
+}
+
+sub __post_voice {
+    my ($access_token,  $status) = @_;
+    my$url_for_post_voice = Mojo::URL->new("https://api.mixi-platform.com/2/voice/statuses");
+    $url_for_post_voice->query([
+            status => $status
+        ]);
+    my $ua = Mojo::UserAgent->new;
+    my $res = $ua->post(
+        $url_for_post_voice => {
+            'Content-Type' => 'application/x-www-form-urlencoded',
+            'Authorization' => "OAuth $access_token"
+        }
+    )->res->content->asset->slurp;
+    print Dumper($res);
     return Mojo::JSON->decode($res);
 }
 
@@ -145,11 +174,21 @@ get '/redirect' => sub{
 
 };
 
+post '/voice' => sub {
+    my $self = shift;
+    my $status = $self->param('status');
+    __post_voice($self->session->{access_token}, $status);
+    $self->redirect_to('/voice');
+};
+
 get '/voice' => sub {
     my $self = shift;
-    my $res_json = __get_user_timeline($self->session->{access_token}, '@me');
-    print Dumper($res_json);
-    $self->stash(user_timeline => $res_json );
+    my $user_timeline_json = __get_user_timeline($self->session->{access_token}, '@me');
+    my $friends_timeline_json = __get_friends_timeline($self->session->{access_token});
+    $self->stash(
+        user_timeline => $user_timeline_json,
+        friends_timeline => $friends_timeline_json
+    );
     $self->render('voice');
 };
 

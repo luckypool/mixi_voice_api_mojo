@@ -4,10 +4,32 @@
 Welcome to mixi Graph API
 </h1>
 <a href='/'>home</a>
+
+<ul>
+<li>自分のタイムライン</li>
+<li>
+<form action='/voice' method="post">
+ボイスの投稿:
+<%= text_field 'status' %>
+<%= submit_button '送信' %>
+</form>
+</li>
 <ul>
 <% foreach my $voice (@$user_timeline) { %>
   <li> <%= $voice->{text} %> </li>
 <% } %>
+</ul>
+</ul>
+<ul>
+<li>マイミクのタイムライン</li>
+<ul>
+<% foreach my $voice (@$friends_timeline) { %>
+  <li>
+    <%= $voice->{user}->{screen_name} %> :
+    <%= $voice->{text} %>
+  </li>
+<% } %>
+</ul>
 </ul>
 
 ログアウト：<a href='/logout'>logout</a>
