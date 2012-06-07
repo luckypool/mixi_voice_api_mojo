@@ -1,21 +1,24 @@
-mixi_voice_api_mojo
+mixi voice api mojo
 ====
 
-About:
+_ABOUT:_
 
 my mojolicious sample for using mixi Voice API
 
 
-USAGE:
+_USAGE:_
 
 morbo hello.pl
 
 
-NOTICE:
+_NOTICE:_
 
 You need libraries (Mojolicious, IO::Socket::SSL).
+
 Please install.
 
+``
 ex. cpanm Mojolicious
     cpanm IO::Socket::SSL
+``
 
