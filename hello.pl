@@ -5,7 +5,7 @@ use constant {
     CONSUMER_KEY => 'XXXX',
     CONSUMER_SECRET => 'XXXX',
     REDIRECT_URI => 'http://localhost:3000/redirect',
-	SCOPE_INFO => 'r_voice w_voice'
+    SCOPE_INFO => 'r_voice w_voice'
 };
 
 sub __get_access_token {
