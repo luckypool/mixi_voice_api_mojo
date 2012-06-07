@@ -1,14 +1,12 @@
 #!/usr/bin/env perl
 use Mojolicious::Lite;
-use Data::Dumper;
 
-my $CREDENTIAL_INFO = {
+use constant {
     CONSUMER_KEY => 'XXXX',
     CONSUMER_SECRET => 'XXXX',
-    REDIRECT_URI => 'http://localhost:3000/redirect'
+    REDIRECT_URI => 'http://localhost:3000/redirect',
+	SCOPE_INFO => 'r_voice w_voice'
 };
-
-my $SCOPE_INFO = 'r_voice w_voice';
 
 sub __get_access_token {
     my ($code) = @_;
@@ -16,10 +14,10 @@ sub __get_access_token {
     my $url_for_get_token = Mojo::URL->new('https://secure.mixi-platform.com/2/token');
     $url_for_get_token->query([
             grant_type => 'authorization_code',
-            client_id => $CREDENTIAL_INFO->{CONSUMER_KEY},,
-            client_secret => $CREDENTIAL_INFO->{CONSUMER_SECRET},
+            client_id => CONSUMER_KEY,
+            client_secret => CONSUMER_SECRET,
             code => $code,
-            redirect_uri => $CREDENTIAL_INFO->{REDIRECT_URI}
+            redirect_uri => REDIRECT_URI
         ]);
     # Mojo::UserAgentを使ってPOSTリクエスト
     my $ua = Mojo::UserAgent->new;
@@ -37,8 +35,8 @@ sub __refresh_access_token {
     my $url_for_get_token = Mojo::URL->new('https://secure.mixi-platform.com/2/token');
     $url_for_get_token->query([
             grant_type => 'refresh_token',
-            client_id => $CREDENTIAL_INFO->{CONSUMER_KEY},,
-            client_secret => $CREDENTIAL_INFO->{CONSUMER_SECRET},
+            client_id => CONSUMER_KEY,
+            client_secret => CONSUMER_SECRET,
             refresh_token => $refresh_token
         ]);
     # Mojo::UserAgentを使ってPOSTリクエスト
@@ -107,15 +105,15 @@ get '/' => sub {
         return $self->render('index');
     }
 
-    my $refreshed_token = __refresh_access_token($self->session->{refresh_token});
-    if (exists $refreshed_token->{error_info}){
-        $self->session(expires => 1);
-        $self->flash(error_info => $refreshed_token->{error_info}+' (Maybe, session-timeout)');
-        return $self->redirect_to('/error');
-    }
-    $self->session(access_token => $refreshed_token->{access_token});
-    $self->session(refresh_token => $refreshed_token->{refresh_token});
-    $self->session(expires => time + $refreshed_token->{expires_in});
+	# my $refreshed_token = __refresh_access_token($self->session->{refresh_token});
+    # if (exists $refreshed_token->{error_info}){
+    #     $self->session(expires => 1);
+    #     $self->flash(error_info => $refreshed_token->{error_info}+' (Maybe, session-timeout)');
+    #     return $self->redirect_to('/error');
+    # }
+    # $self->session(access_token => $refreshed_token->{access_token});
+    # $self->session(refresh_token => $refreshed_token->{refresh_token});
+    # $self->session(expires => time + $refreshed_token->{expires_in});
 
     $self->render('logined');
 };
@@ -124,9 +122,9 @@ get '/auth' => sub {
     my $self = shift;
     my $url = Mojo::URL->new('https://mixi.jp/connect_authorize.pl');
     $url->query([
-            client_id => $CREDENTIAL_INFO->{CONSUMER_KEY},
+            client_id => CONSUMER_KEY,
             response_type => 'code',
-            scope => $SCOPE_INFO
+            scope => SCOPE_INFO
         ]);
     $self->redirect_to($url->to_abs);
 };
@@ -166,6 +164,7 @@ get '/redirect' => sub{
     $self->session(access_token => $token_json->{access_token});
     $self->session(refresh_token => $token_json->{refresh_token});
     $self->session(expires => time + $token_json->{expires_in});
+
     $self->stash(url => '/');
     $self->render('redirect');
 
