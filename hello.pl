@@ -105,17 +105,7 @@ get '/' => sub {
         return $self->render('index');
     }
 
-	# my $refreshed_token = __refresh_access_token($self->session->{refresh_token});
-    # if (exists $refreshed_token->{error_info}){
-    #     $self->session(expires => 1);
-    #     $self->flash(error_info => $refreshed_token->{error_info}+' (Maybe, session-timeout)');
-    #     return $self->redirect_to('/error');
-    # }
-    # $self->session(access_token => $refreshed_token->{access_token});
-    # $self->session(refresh_token => $refreshed_token->{refresh_token});
-    # $self->session(expires => time + $refreshed_token->{expires_in});
-
-    $self->render('logined');
+	$self->render('logined');
 };
 
 get '/auth' => sub {
@@ -192,4 +182,3 @@ get '/voice' => sub {
 };
 
 app->start;
-
